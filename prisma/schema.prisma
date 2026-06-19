@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum SourceType {
+  HUMAN
+  AGENT
+  EXTERNAL_DOCUMENT
+}
+
+enum CredentialStatus {
+  ACTIVE
+  SUSPICIOUS
+  REVOKED
+}
+
+enum EvaluatorType {
+  COUNTERFACTUAL
+  ANOMALY
+  MANUAL
+}
+
+enum EvaluationResult {
+  PASS
+  WARNING
+  FAIL
+}
+
+model MemoryAsset {
+  memoryId         String   @id @default(uuid())
+  contentHash      String   @unique
+  content          Json
+  memwalRef        String?
+  walrusObjectId   String?
+  suiCredentialRef String?
+  sourceAgent      String
+  contentType      String   @default("application/json")
+  createdAt        DateTime @default(now())
+
+  provenance  ProvenanceRecord[]
+  credential  Credential?
+  evaluations TrustEvaluation[]
+
+  @@index([sourceAgent, createdAt])
+}
+
+model ProvenanceRecord {
+  provenanceId  String     @id @default(uuid())
+  memoryId      String
+  creatorAgent  String
+  sourceType    SourceType
+  ingestionPath String
+  createdAt     DateTime   @default(now())
+
+  memory MemoryAsset @relation(fields: [memoryId], references: [memoryId], onDelete: Cascade)
+
+  @@index([memoryId])
+}
+
+model Credential {
+  credentialId String           @id @default(uuid())
+  memoryId     String           @unique
+  trustScore   Int              @default(100)
+  status       CredentialStatus @default(ACTIVE)
+  issuedAt     DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  memory MemoryAsset @relation(fields: [memoryId], references: [memoryId], onDelete: Cascade)
+}
+
+model TrustEvaluation {
+  evaluationId  String           @id @default(uuid())
+  memoryId      String
+  evaluatorType EvaluatorType
+  scoreDelta    Int              @default(0)
+  result        EvaluationResult
+  reason        String
+  confidence    Int?
+  createdAt     DateTime         @default(now())
+
+  memory MemoryAsset @relation(fields: [memoryId], references: [memoryId], onDelete: Cascade)
+
+  @@index([memoryId, createdAt])
+}
+
+model RecoverySnapshot {
+  snapshotId    String   @id @default(uuid())
+  reason        String
+  sourceAgent   String
+  safeMemorySet Json
+  createdAt     DateTime @default(now())
+
+  @@index([sourceAgent, createdAt])
+}
