@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "snd-guard-lifecycle-demo",
+    "name": "SND-GUARD Lifecycle Demo",
+    "description": "SNDGuard AI Memory Security Middleware — full lifecycle demo.\n\nEvery memory gets identity, integrity proof, and trust credential at birth. Query runs counterfactual analysis before an agent consumes memory. Poisoned memories are revoked; audit and recovery complete the loop.\n\n**Setup:** Run `npm run dev` (port 3000). Reset DB between full demo runs.\n\n**Run order:** Folders 0 → 8 top to bottom.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "sourceAgent", "value": "TreasuryAgent" },
+    { "key": "safeMemoryId", "value": "" },
+    { "key": "poisonMemoryId", "value": "" },
+    { "key": "throwawayMemoryId", "value": "" },
+    { "key": "snapshotId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0 — Ops",
+      "item": [
+        {
+          "name": "01 Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Verify server is running."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('status ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 — Flow 1: Memory Creation",
+      "item": [
+        {
+          "name": "02 Create Safe Memory ($10K)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": { \"transactionLimit\": \"$10K\" },\n  \"sourceAgent\": \"TreasuryAgent\",\n  \"creatorAgent\": \"TreasuryAgent\",\n  \"sourceType\": \"AGENT\",\n  \"ingestionPath\": \"demo/session/safe-1\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/memories",
+            "description": "Register safe memory. Expected: 201, ACTIVE credential, trustScore 100."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('ACTIVE at birth', () => {",
+                  "  pm.expect(json.credential.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.credential.trustScore).to.eql(100);",
+                  "});",
+                  "if (json.memoryId) {",
+                  "  pm.collectionVariables.set('safeMemoryId', json.memoryId);",
+                  "  console.log('safeMemoryId:', json.memoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Create Poison Memory ($50K)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": { \"transactionLimit\": \"$50K\" },\n  \"sourceAgent\": \"TreasuryAgent\",\n  \"creatorAgent\": \"AttackerDoc\",\n  \"sourceType\": \"EXTERNAL_DOCUMENT\",\n  \"ingestionPath\": \"attack/upload\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/memories",
+            "description": "Poison enters system — still ACTIVE at birth (policy changes possible)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Still ACTIVE at ingest', () => pm.expect(json.credential.status).to.eql('ACTIVE'));",
+                  "if (json.memoryId) {",
+                  "  pm.collectionVariables.set('poisonMemoryId', json.memoryId);",
+                  "  console.log('poisonMemoryId:', json.memoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Duplicate Safe Memory (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": { \"transactionLimit\": \"$10K\" },\n  \"sourceAgent\": \"TreasuryAgent\",\n  \"creatorAgent\": \"TreasuryAgent\",\n  \"sourceType\": \"AGENT\",\n  \"ingestionPath\": \"demo/session/safe-duplicate\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/memories",
+            "description": "Same content hash — expected 409 Conflict."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 — Flow 2: Query & Detect",
+      "item": [
+        {
+          "name": "05 Query Memories (Detect & Gate)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/memories/query?sourceAgent={{sourceAgent}}&key=transactionLimit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "memories", "query"],
+              "query": [
+                { "key": "sourceAgent", "value": "{{sourceAgent}}" },
+                { "key": "key", "value": "transactionLimit" }
+              ]
+            },
+            "description": "Primary consume path. Expected: consensus $10K, poison blocked/REVOKED."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const poisonId = pm.collectionVariables.get('poisonMemoryId');",
+                  "const safeId = pm.collectionVariables.get('safeMemoryId');",
+                  "pm.test('Consensus is $10K', () => pm.expect(json.consensusValue).to.eql('$10K'));",
+                  "pm.test('Safe memory allowed', () => {",
+                  "  const safe = json.memories.find(m => m.memoryId === safeId);",
+                  "  pm.expect(safe).to.exist;",
+                  "  pm.expect(safe.status).to.eql('ACTIVE');",
+                  "});",
+                  "pm.test('Poison memory blocked', () => {",
+                  "  const blocked = json.blocked.find(b => b.memoryId === poisonId);",
+                  "  pm.expect(blocked).to.exist;",
+                  "  pm.expect(blocked.status).to.eql('REVOKED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 — Trust & Detail",
+      "item": [
+        {
+          "name": "06 Get Safe Memory Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{safeMemoryId}}",
+            "description": "Full memory record for safe memory."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Content is $10K', () => {",
+                  "  pm.expect(pm.response.json().content.transactionLimit).to.eql('$10K');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 Get Safe Credential",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{safeMemoryId}}/trust",
+            "description": "Expected: ACTIVE, trustScore 100."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('ACTIVE 100', () => {",
+                  "  pm.expect(json.status).to.eql('ACTIVE');",
+                  "  pm.expect(json.trustScore).to.eql(100);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 Get Poison Credential (After Query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{poisonMemoryId}}/trust",
+            "description": "Expected: REVOKED, trustScore 0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('REVOKED 0', () => {",
+                  "  pm.expect(json.status).to.eql('REVOKED');",
+                  "  pm.expect(json.trustScore).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 — Explicit Evaluate",
+      "item": [
+        {
+          "name": "09 Explicit Counterfactual Evaluate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{poisonMemoryId}}/evaluate",
+            "description": "Explicit evaluate on poison memory. Expected: isPoisoned true, confidence 100."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Poison detected', () => {",
+                  "  pm.expect(json.isPoisoned).to.be.true;",
+                  "  pm.expect(json.confidence).to.eql(100);",
+                  "});",
+                  "pm.test('Explanation mentions mismatch', () => {",
+                  "  pm.expect(json.explanation).to.include('$50K');",
+                  "  pm.expect(json.explanation).to.include('$10K');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 Trust Evaluation History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{poisonMemoryId}}/evaluations",
+            "description": "Append-only evaluation history. Expected: at least one COUNTERFACTUAL FAIL."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const evals = pm.response.json().evaluations;",
+                  "pm.test('Has FAIL evaluation', () => {",
+                  "  const fail = evals.find(e => e.result === 'FAIL');",
+                  "  pm.expect(fail).to.exist;",
+                  "  pm.expect(fail.evaluatorType).to.eql('COUNTERFACTUAL');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 — Revocation",
+      "item": [
+        {
+          "name": "11 Manual Revoke Poison (Already Revoked)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{poisonMemoryId}}/revoke",
+            "description": "Manual revoke on already-revoked poison memory."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Still REVOKED', () => {",
+                  "  pm.expect(json.status).to.eql('REVOKED');",
+                  "  pm.expect(json.trustScore).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 Create Throwaway Memory",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": { \"note\": \"throwaway-revoke-test\" },\n  \"sourceAgent\": \"TreasuryAgent\",\n  \"creatorAgent\": \"TreasuryAgent\",\n  \"sourceType\": \"AGENT\",\n  \"ingestionPath\": \"demo/revoke-test\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/memories",
+            "description": "Create disposable memory for manual revoke demo."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "if (json.memoryId) {",
+                  "  pm.collectionVariables.set('throwawayMemoryId', json.memoryId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Manual Revoke Throwaway",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/memories/{{throwawayMemoryId}}/revoke",
+            "description": "Manual revoke demo. Expected: REVOKED, trustScore 0."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('REVOKED', () => {",
+                  "  pm.expect(json.status).to.eql('REVOKED');",
+                  "  pm.expect(json.trustScore).to.eql(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6 — Audit Investigation",
+      "item": [
+        {
+          "name": "14 Full Audit — Poison Memory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/audit/memory/{{poisonMemoryId}}",
+            "description": "Security team forensic view: memory, provenance, credential, evaluations, counterfactualEvidence."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Memory is poison', () => {",
+                  "  pm.expect(json.memory.content.transactionLimit).to.eql('$50K');",
+                  "});",
+                  "pm.test('Provenance shows attacker', () => {",
+                  "  pm.expect(json.provenance[0].creatorAgent).to.eql('AttackerDoc');",
+                  "  pm.expect(json.provenance[0].sourceType).to.eql('EXTERNAL_DOCUMENT');",
+                  "});",
+                  "pm.test('Credential REVOKED', () => {",
+                  "  pm.expect(json.credential.status).to.eql('REVOKED');",
+                  "  pm.expect(json.credential.trustScore).to.eql(0);",
+                  "});",
+                  "pm.test('Counterfactual evidence FAIL', () => {",
+                  "  pm.expect(json.counterfactualEvidence).to.exist;",
+                  "  pm.expect(json.counterfactualEvidence.latestResult).to.eql('FAIL');",
+                  "  pm.expect(json.counterfactualEvidence.confidence).to.eql(100);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7 — Recovery",
+      "item": [
+        {
+          "name": "15 Create Safe Snapshot",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Before poisoning detected\",\n  \"sourceAgent\": \"TreasuryAgent\",\n  \"safeMemoryIds\": [\"{{safeMemoryId}}\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/recovery/snapshots",
+            "description": "Snapshot safe memory set BEFORE restore. Must run before step 16."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has snapshotId', () => pm.expect(json.snapshotId).to.be.a('string');",
+                  "if (json.snapshotId) {",
+                  "  pm.collectionVariables.set('snapshotId', json.snapshotId);",
+                  "  console.log('snapshotId:', json.snapshotId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Restore Latest Snapshot",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAgent\": \"TreasuryAgent\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/recovery/restore",
+            "description": "Restore agent to latest safe snapshot."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const safeId = pm.collectionVariables.get('safeMemoryId');",
+                  "pm.test('Safe memory restored', () => {",
+                  "  const restored = json.restoredMemories.find(m => m.memoryId === safeId);",
+                  "  pm.expect(restored).to.exist;",
+                  "  pm.expect(restored.content.transactionLimit).to.eql('$10K');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Restore By Snapshot ID (Optional)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"snapshotId\": \"{{snapshotId}}\",\n  \"sourceAgent\": \"TreasuryAgent\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/recovery/restore",
+            "description": "Optional: restore using explicit snapshotId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8 — Final Verification",
+      "item": [
+        {
+          "name": "18 Re-query After Full Lifecycle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/memories/query?sourceAgent={{sourceAgent}}&key=transactionLimit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "memories", "query"],
+              "query": [
+                { "key": "sourceAgent", "value": "{{sourceAgent}}" },
+                { "key": "key", "value": "transactionLimit" }
+              ]
+            },
+            "description": "Final check: safe allowed, poison still blocked."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "const poisonId = pm.collectionVariables.get('poisonMemoryId');",
+                  "pm.test('Consensus still $10K', () => pm.expect(json.consensusValue).to.eql('$10K'));",
+                  "pm.test('Poison still blocked', () => {",
+                  "  const blocked = json.blocked.find(b => b.memoryId === poisonId);",
+                  "  pm.expect(blocked).to.exist;",
+                  "  pm.expect(blocked.status).to.eql('REVOKED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
