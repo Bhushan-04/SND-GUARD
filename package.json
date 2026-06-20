@@ -14,6 +14,7 @@
     "build": "npm run build -w @snd-guard/shared && npm run build -w @snd-guard/api && npm run build -w @snd-guard/web",
     "build:api": "npm run build -w @snd-guard/api",
     "build:web": "npm run build -w @snd-guard/web",
+    "build:vercel": "npm run build -w @snd-guard/shared && npm run build -w @snd-guard/web",
     "start:api": "npm run start -w @snd-guard/api"
   },
   "devDependencies": {

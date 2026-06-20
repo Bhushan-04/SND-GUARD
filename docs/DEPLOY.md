@@ -33,9 +33,15 @@ Copy from your local `apps/api/.env`:
 
 ## Part 2 — Vercel (Web)
 
+> **Common failure:** Framework set to **Express** or Root Directory left empty.  
+> Must be **Next.js** + Root Directory **`apps/web`**. See `apps/web/VERCEL.md`.
+
 1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import `Bhushan-04/SND-GUARD`.
-2. **Root Directory:** `apps/web`
-3. Framework: Next.js (auto-detected). `vercel.json` handles monorepo build.
+2. **Root Directory:** click **Edit** → set to **`apps/web`** (required for monorepo).
+3. **Framework Preset:** **Next.js** (do not pick Express).
+4. Leave Install/Build empty so `apps/web/vercel.json` is used, or set:
+   - Install: `cd ../.. && npm install`
+   - Build: `cd ../.. && npm run build:vercel`
 
 ### Environment variables
 
