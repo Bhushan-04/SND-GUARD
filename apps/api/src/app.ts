@@ -5,15 +5,32 @@ import { createRoutes } from './modules/memory/memory.routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { getEnv } from './infrastructure/config/env';
 
+function normalizeOrigin(origin: string) {
+  return origin.trim().replace(/\/$/, '');
+}
+
 export function createApp() {
   const app = express();
   const container = createContainer();
   const env = getEnv();
+  const allowedOrigins = env.CORS_ORIGIN.map(normalizeOrigin);
 
   app.use(
     cors({
-      origin: env.CORS_ORIGIN,
-      methods: ['GET', 'POST'],
+      origin(origin, callback) {
+        // Allow non-browser tools (curl, health checks) with no Origin header
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+        if (allowedOrigins.includes(normalizeOrigin(origin))) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: ['Content-Type'],
     }),
   );
   app.use(express.json());
