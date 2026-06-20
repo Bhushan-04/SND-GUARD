@@ -16,7 +16,7 @@ If Root Directory is wrong (repo root), install runs `npm install --prefix=../..
 | Key | Value |
 |-----|--------|
 | `NEXT_PUBLIC_API_URL` | `https://snd-guard.onrender.com` |
-| `NEXT_PUBLIC_SUI_PACKAGE_ID` | `0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6 |
+| `NEXT_PUBLIC_SUI_PACKAGE_ID` | `0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea` |
 
 ## Build (auto from `vercel.json`)
 

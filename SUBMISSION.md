@@ -20,17 +20,17 @@ Middleware that gates AI agent memory consumption with counterfactual consensus,
 - **Live demo:** https://snd-guard-web.vercel.app/demo
 - **Demo video:** _(YouTube URL — ≤5 min; upload unlisted and paste here before final submit)_
 
-## Sui testnet Package ID
+## Sui testnet Package ID (v2 — use for API / PTBs)
 
 ```
-0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 ```
 
-Explorer: https://testnet.suivision.xyz/package/0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+Explorer: https://testnet.suivision.xyz/package/0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 
-Transaction: https://testnet.suivision.xyz/txblock/HDSH1VuCR3wDAVqgu2j82CJx3kZhGJkbFb4WBUmAknMg
+Original v1 publish: `0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6`
 
-Upgrade (v2 — `issue_entry`, `revoke_entry`, events): https://testnet.suivision.xyz/txblock/9omN1VmxszxdUqUWDAR3JYzmVFDVcaiqDgtzW7cszqfq
+Upgrade tx: https://testnet.suivision.xyz/txblock/9omN1VmxszxdUqUWDAR3JYzmVFDVcaiqDgtzW7cszqfq
 
 ## Walrus testnet blob (verify integrity)
 
@@ -89,7 +89,7 @@ _(Add names before final submit)_
 
 ```
 ADAPTER_MODE=production
-SUI_PACKAGE_ID=0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+SUI_PACKAGE_ID=0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 SUI_NETWORK=testnet
 SUI_MNEMONIC=<testnet wallet with gas — Render secret only>
 # or SUI_SECRET_KEY=suiprivkey1... (from sui keytool export)
@@ -98,5 +98,5 @@ WALRUS_AGGREGATOR_URL=https://aggregator.walrus-testnet.walrus.space
 LLM_PROVIDER=openai
 LLM_API_KEY=<optional — enhances counterfactual explanations>
 NEXT_PUBLIC_API_URL=https://snd-guard.onrender.com
-NEXT_PUBLIC_SUI_PACKAGE_ID=0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+NEXT_PUBLIC_SUI_PACKAGE_ID=0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 ```

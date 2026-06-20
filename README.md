@@ -47,10 +47,10 @@ Use the guided wizard at `/demo` or the Postman collection in `postman/`.
 Move package: `packages/sui-contracts/` — **testnet Package ID:**
 
 ```
-0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 ```
 
-Explorer: https://testnet.suivision.xyz/package/0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+Explorer: https://testnet.suivision.xyz/package/0x9c5dd6abaacf9a6a3ba6fa50daf39a0a378458fdc22df69fa2732c93fda04bea
 
 ## Deploy
 

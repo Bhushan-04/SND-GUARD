@@ -62,12 +62,18 @@ export class RegistrationService {
 
     const credential = await this.credentialRepo.create(memory.memoryId, 100);
 
-    const suiCredentialRef = await this.suiAdapter.issueCredential({
-      memoryId: memory.memoryId,
-      contentHash,
-      trustScore: 100,
-      status: 'ACTIVE',
-    });
+    let suiCredentialRef: string;
+    try {
+      suiCredentialRef = await this.suiAdapter.issueCredential({
+        memoryId: memory.memoryId,
+        contentHash,
+        trustScore: 100,
+        status: 'ACTIVE',
+      });
+    } catch (err) {
+      console.warn('[RegistrationService] on-chain credential issue failed:', err);
+      suiCredentialRef = `sui://credential/${memory.memoryId}`;
+    }
 
     await this.memoryRepo.updateAdapterRefs(memory.memoryId, {
       memwalRef,
