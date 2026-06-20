@@ -56,7 +56,7 @@ After deploy, set `NEXT_PUBLIC_API_URL` on Vercel and `CORS_ORIGIN` on Render to
 
 ## Overflow 2026
 
-Track: **Agentic Web** · See `SUBMISSION.md` and `docs/demo-video-script.md`
+Track: **Agentic Web** · See `SUBMISSION.md`, `docs/DEPLOY.md`, and `docs/demo-video-script.md`
 
 ## License
 
