@@ -21,8 +21,11 @@ sui move build
 sui client publish --gas-budget 100000000
 
 # 4. Copy Package ID from output → set in env:
-#    apps/api/.env          SUI_PACKAGE_ID=0x...
-#    apps/web/.env.local    NEXT_PUBLIC_SUI_PACKAGE_ID=0x...
+#    apps/api/.env          SUI_PACKAGE_ID=0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+#    apps/web/.env.local    NEXT_PUBLIC_SUI_PACKAGE_ID=0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+#
+# Published (testnet): 0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+# Explorer: https://testnet.suivision.xyz/package/0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
 ```
 
 ## Module

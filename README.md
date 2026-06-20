@@ -44,7 +44,13 @@ Use the guided wizard at `/demo` or the Postman collection in `postman/`.
 | `SUI_MNEMONIC` | Issuer key (production adapter only) |
 | `ADAPTER_MODE` | `local` (default) or `production` |
 
-Move package: `packages/sui-contracts/` — publish with Sui CLI, then set `SUI_PACKAGE_ID` in env and `NEXT_PUBLIC_SUI_PACKAGE_ID` for the web app.
+Move package: `packages/sui-contracts/` — **testnet Package ID:**
+
+```
+0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
+```
+
+Explorer: https://testnet.suivision.xyz/package/0x498fabc46e9ace28a349dccb4c09d6075bf9b0807f4bc5f5ab5749e58eaeeac6
 
 ## Deploy
 
