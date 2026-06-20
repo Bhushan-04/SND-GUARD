@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import type { CredentialStatus } from '@snd-guard/shared';
 import { TrustBadge } from '@/components/trust-badge';
 import { Button } from '@/components/ui/button';
+import { ProofLinks } from '@/components/proof-links';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { sndGuard } from '@/lib/api';
 
@@ -82,6 +83,13 @@ export default function MemoryDetailPage() {
 
       <Card>
         <CardTitle>Overview</CardTitle>
+        <div className="mt-3">
+          <ProofLinks
+            walrusObjectId={memory?.walrusObjectId as string | undefined}
+            memwalRef={memory?.memwalRef as string | undefined}
+            suiCredentialRef={memory?.suiCredentialRef as string | undefined}
+          />
+        </div>
         <pre className="mt-4 overflow-x-auto font-mono text-xs text-slate-300">
           {JSON.stringify(memory, null, 2)}
         </pre>

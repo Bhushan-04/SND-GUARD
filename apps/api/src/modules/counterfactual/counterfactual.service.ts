@@ -1,6 +1,7 @@
 import { getFactValue } from '../../shared/utils/content-normalizer';
 import { getEnv } from '../../infrastructure/config/env';
 import { CounterfactualEngine, CounterfactualResult } from './counterfactual.engine';
+import { LlmEvaluator } from './llm-evaluator';
 import { MemoryService } from '../memory/memory.service';
 import { CredentialService } from '../credential/credential.service';
 import { TrustEvaluationService } from '../trust-evaluation/trust-evaluation.service';
@@ -31,6 +32,7 @@ function modeValue(values: unknown[]): unknown {
 
 export class CounterfactualService {
   private readonly engine = new CounterfactualEngine();
+  private readonly llm = new LlmEvaluator();
 
   constructor(
     private readonly memoryService: MemoryService,
@@ -139,11 +141,13 @@ export class CounterfactualService {
       if (queryKey && queryConsensus !== undefined && withMeta.length > 1) {
         const candidateValue = getFactValue(candidate.content, queryKey);
         if (JSON.stringify(candidateValue) !== JSON.stringify(queryConsensus)) {
-          results.set(candidate.memoryId, {
+          let analysis: CounterfactualResult = {
             confidence: 100,
             isPoisoned: true,
             explanation: `${queryKey}: candidate ${JSON.stringify(candidateValue)} vs query consensus ${JSON.stringify(queryConsensus)}`,
-          });
+          };
+          analysis = await this.enrichWithLlm(queryKey, candidateValue, queryConsensus, analysis);
+          results.set(candidate.memoryId, analysis);
           continue;
         }
 
@@ -180,6 +184,15 @@ export class CounterfactualService {
             isPoisoned: true,
             explanation: `${queryKey}: candidate ${JSON.stringify(candidateValue)} vs established consensus ${JSON.stringify(peerConsensus)}`,
           };
+          analysis = await this.enrichWithLlm(queryKey, candidateValue, peerConsensus, analysis);
+        }
+      }
+
+      if (analysis.isPoisoned && queryKey) {
+        const candidateValue = getFactValue(candidate.content, queryKey);
+        const peerValues = peerContents.map((p) => getFactValue(p, queryKey)).filter((v) => v !== undefined);
+        if (peerValues.length > 0) {
+          analysis = await this.enrichWithLlm(queryKey, candidateValue, modeValue(peerValues), analysis);
         }
       }
 
@@ -187,6 +200,23 @@ export class CounterfactualService {
     }
 
     return results;
+  }
+
+  private async enrichWithLlm(
+    key: string,
+    candidateValue: unknown,
+    consensus: unknown,
+    base: CounterfactualResult,
+  ): Promise<CounterfactualResult> {
+    const llm = await this.llm.evaluateConflict(key, candidateValue, [consensus]);
+    if (!llm) return base;
+    return {
+      ...base,
+      confidence: Math.max(base.confidence, llm.confidence),
+      explanation: llm.contradicts
+        ? `${base.explanation} — Reason: ${llm.reason} (LLM confidence: ${llm.confidence}%)`
+        : base.explanation,
+    };
   }
 
   /** On tie, prefer the value held by the oldest memory (established fact). */

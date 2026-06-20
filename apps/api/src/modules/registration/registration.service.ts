@@ -57,12 +57,14 @@ export class RegistrationService {
     const walrusObjectId = await this.walrusAdapter.storeProof(contentHash, {
       memoryId: memory.memoryId,
       contentHash,
+      content: normalizedContent,
     });
 
     const credential = await this.credentialRepo.create(memory.memoryId, 100);
 
     const suiCredentialRef = await this.suiAdapter.issueCredential({
       memoryId: memory.memoryId,
+      contentHash,
       trustScore: 100,
       status: 'ACTIVE',
     });

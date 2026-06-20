@@ -7,6 +7,7 @@ import { TrustBadge } from '@/components/trust-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { sndGuard } from '@/lib/api';
+import { ProofLinks } from '@/components/proof-links';
 import { DEFAULT_AGENT, formatDate, truncateId } from '@/lib/utils';
 
 export default function MemoriesPage() {
@@ -105,13 +106,14 @@ export default function MemoriesPage() {
               <th className="px-4 py-3 font-medium">Memory</th>
               <th className="px-4 py-3 font-medium">Content</th>
               <th className="px-4 py-3 font-medium">Trust</th>
+              <th className="px-4 py-3 font-medium">Proofs</th>
               <th className="px-4 py-3 font-medium">Created</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-slate-500">
+                <td colSpan={5} className="px-4 py-8 text-slate-500">
                   Loading…
                 </td>
               </tr>
@@ -133,6 +135,14 @@ export default function MemoriesPage() {
                     {m.credential && (
                       <TrustBadge status={m.credential.status} score={m.credential.trustScore} />
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <ProofLinks
+                      walrusObjectId={m.walrusObjectId}
+                      memwalRef={m.memwalRef}
+                      suiCredentialRef={m.suiCredentialRef}
+                      compact
+                    />
                   </td>
                   <td className="px-4 py-3 text-slate-400">{formatDate(m.createdAt)}</td>
                 </tr>

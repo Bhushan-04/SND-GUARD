@@ -1,7 +1,6 @@
 import { prisma } from '../../database/prisma.client';
 import { HashService } from '../hash/hash.service';
-import { LocalMemWalAdapter } from '../adapters/memwal.adapter';
-import { LocalWalrusAdapter } from '../adapters/walrus.adapter';
+import { createMemWalAdapter, createWalrusAdapter } from '../adapters/adapter.factory';
 import { createSuiAdapter } from '../adapters/sui-sdk.adapter';
 import {
   CredentialRepository,
@@ -29,12 +28,16 @@ export class Container {
   readonly trustEvaluationRepo = new TrustEvaluationRepository(prisma);
   readonly recoveryRepo = new RecoveryRepository(prisma);
 
-  readonly memWalAdapter = new LocalMemWalAdapter(prisma);
-  readonly walrusAdapter = new LocalWalrusAdapter(prisma);
+  readonly walrusAdapter = createWalrusAdapter(prisma);
+  readonly memWalAdapter = createMemWalAdapter(prisma, this.walrusAdapter);
   readonly suiAdapter = createSuiAdapter();
 
   readonly memoryService = new MemoryService(this.memoryRepo);
-  readonly credentialService = new CredentialService(this.credentialRepo);
+  readonly credentialService = new CredentialService(
+    this.credentialRepo,
+    this.memoryRepo,
+    this.suiAdapter,
+  );
   readonly trustEvaluationService = new TrustEvaluationService(this.trustEvaluationRepo);
 
   readonly integrityService = new IntegrityService(

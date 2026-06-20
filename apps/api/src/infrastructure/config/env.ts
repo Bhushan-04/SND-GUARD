@@ -19,6 +19,18 @@ const envSchema = z.object({
   SUI_NETWORK: z.enum(['testnet', 'mainnet', 'localnet']).default('testnet'),
   SUI_PACKAGE_ID: z.string().optional(),
   SUI_MNEMONIC: z.string().optional(),
+  SUI_SECRET_KEY: z.string().optional(),
+  WALRUS_PUBLISHER_URL: z
+    .string()
+    .url()
+    .default('https://publisher.walrus-testnet.walrus.space'),
+  WALRUS_AGGREGATOR_URL: z
+    .string()
+    .url()
+    .default('https://aggregator.walrus-testnet.walrus.space'),
+  LLM_PROVIDER: z.enum(['openai', 'anthropic', 'none']).default('none'),
+  LLM_API_KEY: z.string().optional(),
+  LLM_MODEL: z.string().default('gpt-4o-mini'),
 });
 
 export type Env = z.infer<typeof envSchema>;

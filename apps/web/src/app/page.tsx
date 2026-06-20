@@ -4,6 +4,9 @@ import { ApiHealthBadge } from '@/components/api-health-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { SUI_PACKAGE_ID } from '@/lib/utils';
+import { walrusBlobUrl } from '@/lib/explorer-links';
+
+const EXAMPLE_WALRUS_BLOB = process.env.NEXT_PUBLIC_WALRUS_EXAMPLE_BLOB;
 
 const lifecycle = [
   'Register memory',
@@ -131,8 +134,31 @@ export default function HomePage() {
       </section>
 
       <footer className="mt-16 border-t border-slate-800 pt-8 text-sm text-slate-500">
-        <p>SNDGuard — AI Memory Security Middleware · Track: Agentic Web</p>
-        <p className="mt-2 font-mono text-xs">Package {SUI_PACKAGE_ID}</p>
+        <p>SNDGuard — AI Memory Security Middleware · Track: Agentic Web + Walrus Special</p>
+        <p className="mt-2 font-mono text-xs">
+          Sui Package{' '}
+          <a
+            href={`https://testnet.suivision.xyz/package/${SUI_PACKAGE_ID}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-cyan-400 hover:underline"
+          >
+            {SUI_PACKAGE_ID}
+          </a>
+        </p>
+        {EXAMPLE_WALRUS_BLOB && walrusBlobUrl(EXAMPLE_WALRUS_BLOB) && (
+          <p className="mt-1 font-mono text-xs">
+            Walrus blob{' '}
+            <a
+              href={walrusBlobUrl(EXAMPLE_WALRUS_BLOB)!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline"
+            >
+              {EXAMPLE_WALRUS_BLOB}
+            </a>
+          </p>
+        )}
       </footer>
     </div>
   );

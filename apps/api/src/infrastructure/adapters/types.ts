@@ -18,6 +18,7 @@ export interface MemWalAdapter {
 export interface ProofPayload {
   memoryId: string;
   contentHash: string;
+  content?: Record<string, unknown>;
 }
 
 export interface WalrusAdapter {
@@ -27,11 +28,19 @@ export interface WalrusAdapter {
 
 export interface CredentialIssueInput {
   memoryId: string;
+  contentHash: string;
   trustScore: number;
   status: 'ACTIVE' | 'SUSPICIOUS' | 'REVOKED';
 }
 
+export interface CredentialIssueResult {
+  objectId: string;
+  txDigest?: string;
+}
+
 export interface SuiAdapter {
   issueCredential(input: CredentialIssueInput): Promise<string>;
+  revokeCredential(suiCredentialRef: string): Promise<string | null>;
   getCredentialStatus(suiCredentialRef: string): Promise<'ACTIVE' | 'SUSPICIOUS' | 'REVOKED'>;
+  reportPoisonDetected(memoryId: string, confidence: number): Promise<string | null>;
 }

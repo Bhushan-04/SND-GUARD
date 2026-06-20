@@ -194,6 +194,9 @@ function DemoWizard() {
                       content={demo.safeResult.content}
                       createdAt={demo.safeResult.createdAt}
                       credential={demo.safeResult.credential}
+                      walrusObjectId={demo.safeResult.walrusObjectId}
+                      memwalRef={demo.safeResult.memwalRef}
+                      suiCredentialRef={demo.safeResult.suiCredentialRef}
                     />
                   )}
                   {demo.step === 1 && demo.poisonResult && (
@@ -203,6 +206,9 @@ function DemoWizard() {
                       content={demo.poisonResult.content}
                       createdAt={demo.poisonResult.createdAt}
                       credential={demo.poisonResult.credential}
+                      walrusObjectId={demo.poisonResult.walrusObjectId}
+                      memwalRef={demo.poisonResult.memwalRef}
+                      suiCredentialRef={demo.poisonResult.suiCredentialRef}
                     />
                   )}
                   {demo.step === 2 && demo.queryResult && (

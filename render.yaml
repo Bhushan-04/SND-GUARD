@@ -21,5 +21,13 @@ services:
         value: testnet
       - key: SUI_PACKAGE_ID
         sync: false
+      - key: SUI_SECRET_KEY
+        sync: false
+      - key: SUI_MNEMONIC
+        sync: false
       - key: ADAPTER_MODE
-        value: local
+        value: production
+      - key: WALRUS_PUBLISHER_URL
+        value: https://publisher.walrus-testnet.walrus.space
+      - key: WALRUS_AGGREGATOR_URL
+        value: https://aggregator.walrus-testnet.walrus.space

@@ -2,6 +2,7 @@
 
 import type { CredentialStatus } from '@snd-guard/shared';
 import { TrustBadge } from '@/components/trust-badge';
+import { ProofLinks } from '@/components/proof-links';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { cn, formatDate, truncateId } from '@/lib/utils';
 
@@ -32,6 +33,9 @@ export function MemoryCard({
   createdAt,
   credential,
   role,
+  walrusObjectId,
+  memwalRef,
+  suiCredentialRef,
 }: {
   memoryId: string;
   content: Record<string, unknown>;
@@ -39,6 +43,9 @@ export function MemoryCard({
   createdAt?: string;
   credential?: { status: CredentialStatus; trustScore: number } | null;
   role?: MemoryRole;
+  walrusObjectId?: string | null;
+  memwalRef?: string | null;
+  suiCredentialRef?: string | null;
 }) {
   const amount = extractTransactionLimit(content);
   const styles = role ? roleStyles[role] : null;
@@ -87,6 +94,12 @@ export function MemoryCard({
       {contentHash && (
         <p className="font-mono text-[11px] text-slate-500">hash {truncateId(contentHash, 12)}</p>
       )}
+      <ProofLinks
+        walrusObjectId={walrusObjectId}
+        memwalRef={memwalRef}
+        suiCredentialRef={suiCredentialRef}
+        compact
+      />
     </Card>
   );
 }

@@ -22,8 +22,13 @@ Copy from your local `apps/api/.env`:
 | `SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
 | `CORS_ORIGIN` | `https://YOUR-APP.vercel.app,http://localhost:3001` |
 | `SUI_NETWORK` | `testnet` |
-| `SUI_PACKAGE_ID` | After Move publish (Part 3) |
-| `ADAPTER_MODE` | `local` (or `production` with `SUI_MNEMONIC`) |
+| `SUI_PACKAGE_ID` | After Move publish (Part 3) — republish for `issue_entry` / `revoke_entry` |
+| `SUI_MNEMONIC` | Testnet wallet with gas (secret; required for on-chain credentials) |
+| `ADAPTER_MODE` | `production` (Walrus HTTP + Sui when mnemonic set) |
+| `WALRUS_PUBLISHER_URL` | `https://publisher.walrus-testnet.walrus.space` |
+| `WALRUS_AGGREGATOR_URL` | `https://aggregator.walrus-testnet.walrus.space` |
+| `LLM_PROVIDER` | `openai` or `anthropic` or `none` |
+| `LLM_API_KEY` | Optional — richer counterfactual explanations |
 | `NODE_ENV` | `production` (set by render.yaml) |
 
 4. Deploy → wait for build (`npm install` + shared + api build).
@@ -49,6 +54,7 @@ Copy from your local `apps/api/.env`:
 |-----|--------|
 | `NEXT_PUBLIC_API_URL` | `https://YOUR-SERVICE.onrender.com` (no trailing slash) |
 | `NEXT_PUBLIC_SUI_PACKAGE_ID` | Same as `SUI_PACKAGE_ID` after publish |
+| `NEXT_PUBLIC_WALRUS_EXAMPLE_BLOB` | Example blobId for landing footer (from demo run) |
 
 4. Deploy → open `https://YOUR-APP.vercel.app/demo`.
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import type { AuditResult } from '@snd-guard/shared';
+import { ProofLinks } from '@/components/proof-links';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { sndGuard } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -35,6 +36,17 @@ export default function AuditPage() {
 
       {audit && (
         <>
+          <Card>
+            <CardTitle>Integrity proofs</CardTitle>
+            <div className="mt-3">
+              <ProofLinks
+                walrusObjectId={audit.memory.walrusObjectId as string | undefined}
+                memwalRef={audit.memory.memwalRef as string | undefined}
+                suiCredentialRef={audit.memory.suiCredentialRef as string | undefined}
+              />
+            </div>
+          </Card>
+
           <Card>
             <CardTitle>Counterfactual evidence</CardTitle>
             {audit.counterfactualEvidence ? (
