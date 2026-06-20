@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: snd-guard-api
+    runtime: node
+    rootDir: apps/api
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ADAPTER_MODE
+        value: local
