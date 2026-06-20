@@ -12,12 +12,12 @@ function toBytes(value: string): number[] {
   return Array.from(new TextEncoder().encode(value));
 }
 
+/** Official @mysten/sui export paths (works on Render; do not use dist/cjs/... subpaths). */
 function loadSuiSdk() {
-  const { Ed25519Keypair } = require('@mysten/sui/dist/cjs/keypairs/ed25519');
-  const { SuiClient, getFullnodeUrl } = require('@mysten/sui/dist/cjs/client');
-  const { Transaction } = require('@mysten/sui/dist/cjs/transactions');
-  const { decodeSuiPrivateKey } = require('@mysten/sui/dist/cjs/cryptography/keypair');
-  return { Ed25519Keypair, SuiClient, getFullnodeUrl, Transaction, decodeSuiPrivateKey };
+  const { Ed25519Keypair } = require('@mysten/sui/keypairs/ed25519');
+  const { SuiClient, getFullnodeUrl } = require('@mysten/sui/client');
+  const { Transaction } = require('@mysten/sui/transactions');
+  return { Ed25519Keypair, SuiClient, getFullnodeUrl, Transaction };
 }
 
 function loadKeypair(
@@ -25,11 +25,10 @@ function loadKeypair(
   mnemonic?: string,
   secretKey?: string,
 ) {
-  if (secretKey) {
-    const { secretKey: bytes } = sdk.decodeSuiPrivateKey(secretKey.trim());
-    return sdk.Ed25519Keypair.fromSecretKey(bytes);
+  if (secretKey?.trim()) {
+    return sdk.Ed25519Keypair.fromSecretKey(secretKey.trim());
   }
-  if (mnemonic) {
+  if (mnemonic?.trim()) {
     return sdk.Ed25519Keypair.deriveKeypair(mnemonic.trim());
   }
   return null;
@@ -40,7 +39,7 @@ function hasSuiSigner(env: ReturnType<typeof getEnv>): boolean {
 }
 
 /**
- * Uses Sui testnet when ADAPTER_MODE=production and SUI_PACKAGE_ID + SUI_MNEMONIC are set.
+ * Uses Sui testnet when ADAPTER_MODE=production and SUI_PACKAGE_ID + signer are set.
  */
 export class SuiSdkAdapter implements SuiAdapter {
   private readonly fallback = new LocalSuiAdapter();
@@ -55,20 +54,28 @@ export class SuiSdkAdapter implements SuiAdapter {
   constructor() {
     const env = getEnv();
     this.packageId = env.SUI_PACKAGE_ID;
-    const sdk = loadSuiSdk();
-    this.TransactionCtor = sdk.Transaction;
 
     if (env.ADAPTER_MODE === 'production' && hasSuiSigner(env) && env.SUI_PACKAGE_ID) {
-      this.keypair = loadKeypair(sdk, env.SUI_MNEMONIC, env.SUI_SECRET_KEY);
-      this.client = new sdk.SuiClient({ url: sdk.getFullnodeUrl(env.SUI_NETWORK) });
+      try {
+        const sdk = loadSuiSdk();
+        this.TransactionCtor = sdk.Transaction;
+        this.keypair = loadKeypair(sdk, env.SUI_MNEMONIC, env.SUI_SECRET_KEY);
+        this.client = new sdk.SuiClient({ url: sdk.getFullnodeUrl(env.SUI_NETWORK) });
+      } catch (err) {
+        console.warn('[SuiSdkAdapter] init failed:', err);
+        this.keypair = null;
+        this.client = null;
+        this.TransactionCtor = null;
+      }
     } else {
       this.keypair = null;
       this.client = null;
+      this.TransactionCtor = null;
     }
   }
 
   async issueCredential(input: CredentialIssueInput): Promise<string> {
-    if (!this.client || !this.keypair || !this.packageId) {
+    if (!this.client || !this.keypair || !this.packageId || !this.TransactionCtor) {
       return this.fallback.issueCredential(input);
     }
 
@@ -102,10 +109,9 @@ export class SuiSdkAdapter implements SuiAdapter {
   }
 
   async revokeCredential(suiCredentialRef: string): Promise<string | null> {
-    if (!this.client || !this.keypair || !this.packageId) {
+    if (!this.client || !this.keypair || !this.packageId || !this.TransactionCtor) {
       return null;
     }
-
     if (!suiCredentialRef.startsWith('0x')) {
       return null;
     }
@@ -126,7 +132,7 @@ export class SuiSdkAdapter implements SuiAdapter {
   }
 
   async emitPoisonDetected(memoryId: string, confidence: number): Promise<string | null> {
-    if (!this.client || !this.keypair || !this.packageId) {
+    if (!this.client || !this.keypair || !this.packageId || !this.TransactionCtor) {
       return null;
     }
 

@@ -11,7 +11,7 @@
     "prisma:push": "prisma db push"
   },
   "dependencies": {
-    "@mysten/sui": "^1.28.2",
+    "@mysten/sui": "1.28.2",
     "@prisma/client": "^6.9.0",
     "@snd-guard/shared": "*",
     "@supabase/ssr": "^0.12.0",

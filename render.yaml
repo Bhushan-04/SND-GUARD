@@ -5,6 +5,8 @@ services:
     buildCommand: npm install && npm run build -w @snd-guard/shared && npm run build -w @snd-guard/api
     startCommand: npm run start:api
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
