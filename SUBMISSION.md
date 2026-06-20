@@ -7,19 +7,24 @@ SNDGuard — AI Memory Security Middleware
 Middleware that gates AI agent memory consumption with counterfactual consensus, trust credentials on Sui, and Walrus integrity proofs.
 
 ## Track
-Agentic Web
+**Agentic Web**
 
 ## Links
-- **GitHub:** (public repo URL)
-- **Live site:** (Vercel URL)
-- **Demo video:** (YouTube ≤5 min)
-- **API health:** `/health`
+- **GitHub:** https://github.com/Bhushan-04/SND-GUARD
+- **Live site:** _(set after Vercel deploy — e.g. https://snd-guard.vercel.app)_
+- **Live API:** _(set after Render deploy — e.g. https://snd-guard-api.onrender.com/health)_
+- **Demo:** `/demo` on live site
+- **Demo video:** _(YouTube URL — ≤5 min)_
 
 ## Sui testnet Package ID
-Set after publishing `packages/sui-contracts`:
+Publish with `packages/sui-contracts/README.md`, then set:
+
 ```
 SUI_PACKAGE_ID=0x...
+NEXT_PUBLIC_SUI_PACKAGE_ID=0x...
 ```
+
+Explorer: `https://testnet.suivision.xyz/package/<PACKAGE_ID>`
 
 ## Problem
 AI agents accumulate long-term memory. A single poisoned fact (e.g. `$50K` transaction limit vs `$10K`) can cause catastrophic autonomous actions — Semantic Norm Drift.
@@ -33,10 +38,17 @@ SNDGuard registers memories without blocking ingest, then applies counterfactual
 - **Agentic Web:** Memory is the attack surface for autonomous agents
 
 ## Demo scenario
-TreasuryAgent · safe `$10K` vs poison `$50K` · live at `/demo`
+TreasuryAgent · safe `$10K` vs poison `$50K` · guided wizard at `/demo`
 
 ## Tech stack
-TypeScript, Express, Prisma, Supabase Postgres, Next.js, Mysten Sui SDK, Walrus (integration path)
+TypeScript, Express, Prisma, Supabase Postgres, Next.js, Mysten Sui SDK
 
 ## Team
-(Add names)
+_(Add names)_
+
+## Deploy checklist
+- [ ] Render: API + env vars from `.env.example`
+- [ ] Vercel: `apps/web` + `NEXT_PUBLIC_API_URL`
+- [ ] Sui: publish Move package, set Package ID
+- [ ] YouTube demo video
+- [ ] Submit at https://overflow.sui.io

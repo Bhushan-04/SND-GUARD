@@ -17,6 +17,12 @@ export const metadata: Metadata = {
   title: 'SNDGuard — AI Memory Security Middleware',
   description:
     'Stop poisoned agent memories before they drive bad actions. Trust credentials on Sui, integrity proofs on Walrus.',
+  icons: { icon: '/logo.png', apple: '/logo.png' },
+  openGraph: {
+    title: 'SNDGuard',
+    description: 'AI Memory Security Middleware',
+    images: ['/logo.png'],
+  },
 };
 
 export default function RootLayout({

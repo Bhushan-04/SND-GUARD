@@ -48,8 +48,11 @@ Move package: `packages/sui-contracts/` — publish with Sui CLI, then set `SUI_
 
 ## Deploy
 
-- **Web:** Vercel — root `apps/web`, env `NEXT_PUBLIC_API_URL`
-- **API:** Render — see `render.yaml`, env from `.env.example`
+- **Web:** Vercel — set root directory to `apps/web` (or use repo `vercel.json`)
+- **API:** Render — use root `render.yaml`, set env from `.env.example`
+- **Repo:** https://github.com/Bhushan-04/SND-GUARD
+
+After deploy, set `NEXT_PUBLIC_API_URL` on Vercel and `CORS_ORIGIN` on Render to your Vercel URL.
 
 ## Overflow 2026
 

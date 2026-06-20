@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Shield } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const links = [
@@ -17,9 +17,7 @@ export function SiteHeader({ className }: { className?: string }) {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold text-slate-100">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400">
-            <Shield className="h-5 w-5" aria-hidden />
-          </span>
+          <Image src="/logo.png" alt="" width={36} height={36} className="rounded-lg" priority />
           SNDGuard
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2">

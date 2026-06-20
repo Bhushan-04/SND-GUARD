@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd ../.. && npm install && npm run build -w @snd-guard/shared && npm run build -w @snd-guard/web",
-  "outputDirectory": ".next",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install"
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run build -w @snd-guard/shared && npm run build -w @snd-guard/web"
 }
