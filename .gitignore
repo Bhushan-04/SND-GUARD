@@ -7,3 +7,5 @@ apps/api/.env
 .DS_Store
 .next/
 packages/shared/dist/
+packages/sui-contracts/build/
+packages/sui-contracts/build/
