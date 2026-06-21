@@ -18,7 +18,7 @@ Middleware that gates AI agent memory consumption with counterfactual consensus,
 - **Live site:** https://snd-guard-web.vercel.app
 - **Live API:** https://snd-guard.onrender.com ([health](https://snd-guard.onrender.com/health))
 - **Live demo:** https://snd-guard-web.vercel.app/demo
-- **Demo video:** _(YouTube URL — ≤5 min; upload unlisted and paste here before final submit)_
+- **Demo video:** _(uploading shortly — unlisted YouTube link will be added before final submit)_
 
 ## Sui testnet Package ID (v2 — use for API / PTBs)
 
@@ -74,7 +74,7 @@ TypeScript, Express, Prisma, Supabase Postgres, Next.js, Mysten Sui SDK, Walrus 
 
 ## Team
 
-_(Add names before final submit)_
+- Bhushan (Lead Developer)
 
 ## Deploy checklist
 
@@ -82,7 +82,7 @@ _(Add names before final submit)_
 - [x] Vercel: `apps/web` + `NEXT_PUBLIC_API_URL`
 - [x] Sui: publish Move package, set Package ID
 - [x] Walrus: HTTP adapter on testnet (production mode)
-- [ ] YouTube demo video
+- [ ] YouTube demo video (in progress)
 - [ ] Submit at https://overflow.sui.io / DeepSurge (Agentic Web + Walrus Special Track)
 
 ## Production env (Render + Vercel)
