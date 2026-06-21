@@ -36,7 +36,14 @@ export function createApp() {
   app.use(express.json());
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      walrus: !!env.WALRUS_PUBLISHER_URL,
+      adapter: env.ADAPTER_MODE,
+      suiPackage: env.SUI_PACKAGE_ID,
+      environment: process.env.NODE_ENV || 'development'
+    });
   });
 
   app.use('/api/v1', createRoutes(container));
